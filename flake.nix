@@ -1,28 +1,24 @@
 {
-  description = "opencode (v1.0.222) + opencode-openai-codex-auth devshell";
+  description = "opencode + opencode-openai-codex-auth devshell";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
-    opencode.url = "github:sst/opencode/v1.0.222";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
   };
 
-  outputs = { self, nixpkgs, opencode }:
+  outputs = { self, nixpkgs }:
     let
       system = "x86_64-linux";
       pkgs = nixpkgs.legacyPackages.${system};
+
       opencodeBin = pkgs.writeShellScriptBin "opencode" ''
-        exec nix run ${opencode.outPath} -- "$@"
+        exec nix run github:NixOS/nixpkgs/nixos-unstable#opencode -- "$@"
       '';
-    in
-    {
+    in {
       devShells.${system}.default = pkgs.mkShell {
-        packages = [
-          opencodeBin
-          pkgs.jq
-          pkgs.git
-        ];
+        packages = [ opencodeBin pkgs.jq pkgs.git ];
         shellHook = ''
-          echo "opencode pinned: v1.0.222"
+          echo "opencode: nixpkgs/nixos-unstable#opencode (v$(nix eval --raw github:NixOS/nixpkgs/nixos-unstable#opencode.version 2>/dev/null || echo 'unknown'))"
+          echo ""
           echo "Link config:"
           echo "  mkdir -p ~/.config/opencode"
           echo "  ln -sf $PWD/opencode.json ~/.config/opencode/opencode.json"
