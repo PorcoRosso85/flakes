@@ -567,5 +567,11 @@
         }
       }
     }
+  },
+  "agent": {
+    "coder": {
+      "provider": "openai",
+      "model": "gpt-5.1-codex-low"
+    }
   }
 }
