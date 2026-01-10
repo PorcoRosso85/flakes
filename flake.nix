@@ -1,8 +1,18 @@
 {
+  description = "opencode-auth: devShell for OpenCode OAuth config";
+
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    flake-parts.url = "github:hercules-ci/flake-parts";
-    opencode.url = "github:anomalyco/opencode/v1.1.6";
+
+    flake-parts = {
+      url = "github:hercules-ci/flake-parts";
+      inputs.nixpkgs-lib.follows = "nixpkgs";
+    };
+
+    opencode = {
+      url = "github:anomalyco/opencode/v1.1.6";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -18,6 +28,10 @@
         ./parts/devshell-check.nix
       ];
 
-      flake.flakeModules.default = ./parts/devshell.nix;
+      flake.flakeModules = {
+        default = ./parts/devshell.nix;
+        devshell = ./parts/devshell.nix;
+        devshellCheck = ./parts/devshell-check.nix;
+      };
     };
 }
