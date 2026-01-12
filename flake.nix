@@ -26,6 +26,7 @@
       imports = [
         ./parts/devshell.nix
         ./parts/devshell-check.nix
+        ./parts/cue.nix
       ];
 
       flake.flakeModules = {
