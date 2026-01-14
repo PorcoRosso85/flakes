@@ -27,6 +27,7 @@
         ./parts/devshell.nix
         ./parts/devshell-check.nix
         ./parts/cue.nix
+        ./parts/lazygit-delta/default.nix
       ];
 
       flake.flakeModules = {
