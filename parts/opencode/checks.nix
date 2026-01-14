@@ -34,8 +34,11 @@
         cd "$TMPDIR"
 
         export OPENCODE_CONFIG="${./config/opencode-lsp.json}"
-        # Last precedence override (blocks plugin/provider/etc from project/global configs)
-        export OPENCODE_CONFIG_CONTENT='{"$schema":"https://opencode.ai/config.json","plugin":[]}'
+        export OPENCODE_DISABLE_LSP_DOWNLOAD=true
+
+        # Last precedence override (blocks project/global config merge).
+        # Also pins LSP server commands to PATH to avoid project dependency checks.
+        export OPENCODE_CONFIG_CONTENT='{"$schema":"https://opencode.ai/config.json","plugin":[],"lsp":{"typescript":{"command":["typescript-language-server","--stdio"],"extensions":[".ts",".tsx",".js",".jsx"]},"pyright":{"command":["pyright-langserver","--stdio"],"extensions":[".py",".pyi"]}}}'
 
         export OPENCODE_OUTPUT_CONTRACT="${./tests/output-contract.sh}"
 
