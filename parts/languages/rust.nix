@@ -1,0 +1,55 @@
+{ ... }:
+{
+  perSystem =
+    { pkgs, ... }:
+    let
+      rustAnalyzer = pkgs.rust-analyzer;
+      rustTooling = pkgs.symlinkJoin {
+        name = "rust-tooling";
+        paths = [
+          pkgs.rustc
+          pkgs.cargo
+          rustAnalyzer
+          pkgs.rustfmt
+          pkgs.clippy
+        ];
+      };
+
+      smoke = pkgs.runCommand "rust-smoke" { nativeBuildInputs = [ rustTooling ]; } ''
+        set -euo pipefail
+
+        missing=0
+
+        need() {
+          if ! command -v "$1" >/dev/null 2>&1; then
+            echo "missing: $1" >&2
+            missing=1
+            return 0
+          fi
+          "$1" --version >/dev/null 2>&1 || true
+        }
+
+        need rustc
+        need cargo
+        need rust-analyzer
+        need rustfmt
+        need cargo-clippy
+
+        test "$missing" -eq 0
+        mkdir -p "$out"
+        echo "ok" > "$out/result"
+      '';
+    in
+    {
+      packages.rust-tooling = rustTooling;
+      packages.rust-lsp = rustAnalyzer;
+      packages.rust-lint = pkgs.clippy;
+      packages.rust-fmt = pkgs.rustfmt;
+
+      devShells.rust = pkgs.mkShell {
+        packages = [ rustTooling ];
+      };
+
+      checks.rust-smoke = smoke;
+    };
+}
