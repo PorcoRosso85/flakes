@@ -30,6 +30,11 @@
           ./parts/devshell/default.nix
           ./parts/cue.nix
           ./parts/lazygit-delta/default.nix
+
+          ./parts/languages/python.nix
+          ./parts/languages/bun.nix
+          ./parts/languages/rust.nix
+          ./parts/languages/contract.nix
         ];
 
         flake.flakeModules = {
