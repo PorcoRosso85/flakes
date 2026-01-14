@@ -39,8 +39,9 @@
 
         export OPENCODE_OUTPUT_CONTRACT="${./tests/output-contract.sh}"
 
-        export OPENCODE_LSP_SMOKE_RETRIES="${toString 15}"
-        export OPENCODE_LSP_SMOKE_SLEEP_S="${toString 0.4}"
+        # In a cold Nix sandbox, LSP startup can take time (node + server init).
+        export OPENCODE_LSP_SMOKE_RETRIES="${toString 40}"
+        export OPENCODE_LSP_SMOKE_SLEEP_S="${toString 0.5}"
       '';
 
       bunSmoke =

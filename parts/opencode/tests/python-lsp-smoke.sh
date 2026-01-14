@@ -37,9 +37,12 @@ PY
 retries="${OPENCODE_LSP_SMOKE_RETRIES:-15}"
 sleep_s="${OPENCODE_LSP_SMOKE_SLEEP_S:-0.4}"
 
+errfile="$workdir/opencode.stderr"
+
 out=""
 for i in $(seq 1 "$retries"); do
-	out="$(opencode debug lsp diagnostics main.py 2>/dev/null || true)"
+	: >"$errfile"
+	out="$(opencode debug lsp diagnostics main.py 2>"$errfile" || true)"
 	if assert_diagnostics_nonempty "$out"; then
 		exit 0
 	fi
@@ -49,4 +52,8 @@ done
 echo "python-lsp-smoke failed after ${retries} tries" >&2
 echo "last output:" >&2
 printf '%s\n' "$out" >&2
+
+echo "last stderr:" >&2
+${PAGER:-cat} "$errfile" >&2 || true
+
 exit 1
