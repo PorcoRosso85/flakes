@@ -37,6 +37,8 @@
         # Last precedence override (blocks plugin/provider/etc from project/global configs)
         export OPENCODE_CONFIG_CONTENT='{"$schema":"https://opencode.ai/config.json","plugin":[]}'
 
+        export OPENCODE_OUTPUT_CONTRACT="${./tests/output-contract.sh}"
+
         export OPENCODE_LSP_SMOKE_RETRIES="${toString 15}"
         export OPENCODE_LSP_SMOKE_SLEEP_S="${toString 0.4}"
       '';

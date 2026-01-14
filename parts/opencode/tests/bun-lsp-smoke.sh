@@ -3,9 +3,21 @@ set -euo pipefail
 
 # TS/JS smoke: minimal project in TMPDIR, then `opencode debug lsp diagnostics` returns non-empty.
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# shellcheck source=output-contract.sh
-source "$SCRIPT_DIR/output-contract.sh"
+contract="${OPENCODE_OUTPUT_CONTRACT:-}"
+if [[ -z "$contract" ]]; then
+	script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+	if [[ -f "$script_dir/output-contract.sh" ]]; then
+		contract="$script_dir/output-contract.sh"
+	fi
+fi
+
+if [[ -z "$contract" ]]; then
+	echo "missing OPENCODE_OUTPUT_CONTRACT (output-contract.sh)" >&2
+	exit 1
+fi
+
+# shellcheck source=/dev/null
+source "$contract"
 
 workdir="$(mktemp -d "${TMPDIR:-/tmp}/opencode-bun-lsp.XXXXXXXX")"
 cd "$workdir"
