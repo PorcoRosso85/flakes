@@ -4,17 +4,55 @@
 # そのため config.yml は store 生成し、実行時に writable dir へコピーして使う。
 {
   pkgs,
-  deltaPager ? "delta --side-by-side --paging=never --width={{columnWidth}}",
+  deltaPager ? null,
 }:
 let
   yaml = pkgs.formats.yaml { };
+
+  deltaPagerWrapper = pkgs.writeShellScriptBin "lazygit-delta-pager" ''
+    set -euo pipefail
+
+    column_width=""
+    args=()
+
+    while [[ $# -gt 0 ]]; do
+      case "$1" in
+        --column-width=*)
+          column_width="''${1#*=}"
+          shift
+          ;;
+        --column-width)
+          column_width="''${2:-}"
+          shift 2
+          ;;
+        *)
+          args+=("$1")
+          shift
+          ;;
+      esac
+    done
+
+    if [[ -n "$column_width" ]] && [[ "$column_width" =~ ^[0-9]+$ ]]; then
+      export LAZYGIT_DELTA_COLUMN_WIDTH="$column_width"
+      export LAZYGIT_DELTA_WIDTH="$(( column_width * 2 + 1 ))"
+      exec ${pkgs.delta}/bin/delta --width="$LAZYGIT_DELTA_WIDTH" "''${args[@]}"
+    fi
+
+    exec ${pkgs.delta}/bin/delta "''${args[@]}"
+  '';
+
+  effectiveDeltaPager =
+    if deltaPager != null then
+      deltaPager
+    else
+      "${deltaPagerWrapper}/bin/lazygit-delta-pager --column-width={{columnWidth}} --side-by-side --paging=never";
 
   cfgFile = yaml.generate "config.yml" {
     git = {
       pagers = [
         {
           colorArg = "always";
-          pager = deltaPager;
+          pager = effectiveDeltaPager;
         }
       ];
     };
