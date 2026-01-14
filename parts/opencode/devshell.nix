@@ -21,7 +21,7 @@
         else
           throw "inputs.opencode must expose packages.${sys}.opencode/default or apps.${sys}.opencode/opencode-dev";
 
-      opencodeConfig = ../opencode.json;
+      opencodeConfig = ../../opencode.json;
 
       lspTooling = pkgs.symlinkJoin {
         name = "opencode-lsp-tooling";
