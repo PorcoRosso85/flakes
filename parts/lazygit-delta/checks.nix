@@ -21,7 +21,7 @@
     fi
 
     # pager wrapper が幅を export している（デバッグ/切り分け用）
-    pager_bin="$(${pkgs.gnugrep}/bin/grep -oE '/nix/store/[^"'"' ]+/bin/lazygit-delta-pager' ${cfgFile} | ${pkgs.coreutils}/bin/head -n1)"
+    pager_bin="$(${pkgs.gnugrep}/bin/grep -oE '/nix/store/[^" ]+/bin/lazygit-delta-pager' ${cfgFile} | ${pkgs.coreutils}/bin/head -n1)"
     test -n "$pager_bin"
     ${pkgs.gnugrep}/bin/grep -q -- 'LAZYGIT_DELTA_WIDTH' "$pager_bin"
 
