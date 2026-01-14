@@ -28,12 +28,15 @@
           ./parts/devshell.nix
           ./parts/devshell-check.nix
           ./parts/devshell/default.nix
-          ./parts/cue.nix
           ./parts/lazygit-delta/default.nix
 
           ./parts/languages/python.nix
           ./parts/languages/bun.nix
           ./parts/languages/rust.nix
+          ./parts/languages/go.nix
+          ./parts/languages/zig.nix
+          ./parts/languages/nix.nix
+          ./parts/languages/cue.nix
           ./parts/languages/contract.nix
         ];
 
