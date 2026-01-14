@@ -4,7 +4,7 @@
 # そのため config.yml は store 生成し、実行時に writable dir へコピーして使う。
 {
   pkgs,
-  deltaPager ? "delta --paging=never",
+  deltaPager ? "delta --side-by-side --paging=never --width={{columnWidth}}",
 }:
 let
   yaml = pkgs.formats.yaml { };

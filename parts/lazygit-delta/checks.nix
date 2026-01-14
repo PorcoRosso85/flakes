@@ -8,9 +8,11 @@
   lazygit-delta = pkgs.runCommand "check-lazygit-delta" { } ''
     set -euo pipefail
 
-    # 1) 生成された config.yml に delta 指定が入っている
+    # 1) 生成された config.yml に delta 指定が入っている（side-by-side/width も含む）
     ${pkgs.gnugrep}/bin/grep -qE 'pager:.*delta' ${cfgFile}
+    ${pkgs.gnugrep}/bin/grep -q -- '--side-by-side' ${cfgFile}
     ${pkgs.gnugrep}/bin/grep -q -- '--paging=never' ${cfgFile}
+    ${pkgs.gnugrep}/bin/grep -q -- '--width={{columnWidth}}' ${cfgFile}
 
     # 2) wrapper が --use-config-dir を使っている
     ${pkgs.gnugrep}/bin/grep -q -- '--use-config-dir' ${package}/bin/lazygit
