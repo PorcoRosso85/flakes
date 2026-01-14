@@ -41,6 +41,13 @@ let
 
     cp ${cfgFile} "$cfg_dir/config.yml"
 
+    # `lazygit --version` は環境によって /dev/tty を要求して失敗し得るため、
+    # TTY不要な範囲では wrapper 側でバージョン文字列を返す。
+    if [[ "''${1:-}" == "--version" ]] || [[ "''${1:-}" == "-v" ]]; then
+      printf 'lazygit %s\n' "${pkgs.lazygit.version}"
+      exit 0
+    fi
+
     warn() {
       printf '%s\n' "$*" >&2
     }
