@@ -17,22 +17,32 @@
 
   outputs =
     inputs@{ flake-parts, ... }:
-    flake-parts.lib.mkFlake { inherit inputs; } {
-      systems = [
-        "x86_64-linux"
-        "aarch64-linux"
-      ];
+    let
+      result = flake-parts.lib.mkFlake { inherit inputs; } {
+        systems = [
+          "x86_64-linux"
+          "aarch64-linux"
+        ];
 
-      imports = [
-        ./parts/devshell.nix
-        ./parts/devshell-check.nix
-        ./parts/cue.nix
-      ];
+        imports = [
+          ./parts/devshell.nix
+          ./parts/devshell-check.nix
+          ./parts/devshell/default.nix
+          ./parts/cue.nix
+          ./parts/lazygit-delta/default.nix
+        ];
 
-      flake.flakeModules = {
-        default = ./parts/devshell.nix;
-        devshell = ./parts/devshell.nix;
-        devshellCheck = ./parts/devshell-check.nix;
+        flake.flakeModules = {
+          default = ./parts/devshell.nix;
+          devshell = ./parts/devshell.nix;
+          devshellCheck = ./parts/devshell-check.nix;
+        };
+      };
+    in
+    result
+    // {
+      lib = (result.lib or { }) // {
+        mkGitGhShell = { pkgs, ... }@args: import ./parts/devshell/mkGitGhShell.nix args;
       };
     };
 }

@@ -25,6 +25,13 @@
     in
     {
       checks.opencode-smoke = pkgs.runCommand "opencode-smoke" { nativeBuildInputs = [ opencodePkg ]; } ''
+        set -euo pipefail
+
+        export HOME="$TMPDIR"
+        export XDG_CACHE_HOME="$TMPDIR/.cache"
+        export XDG_CONFIG_HOME="$TMPDIR/.config"
+        mkdir -p "$XDG_CACHE_HOME" "$XDG_CONFIG_HOME"
+
         test -f ${opencodeConfig}
         ${opencodePkg}/bin/opencode --help >/dev/null
         touch $out
