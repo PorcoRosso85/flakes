@@ -11,8 +11,6 @@
     {
       packages.lazygit = mod.package;
 
-      apps.lazygit = mod.app;
-
       checks = mkChecks {
         inherit pkgs;
         package = mod.package;

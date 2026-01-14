@@ -83,12 +83,7 @@ let
     exec ${pkgs.lazygit}/bin/lazygit --use-config-dir "$cfg_dir" "$@"
   '';
 
-  app = {
-    type = "app";
-    program = "${package}/bin/lazygit";
-  };
 in
 {
   inherit package cfgFile;
-  app = app;
 }
