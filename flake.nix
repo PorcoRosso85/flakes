@@ -25,10 +25,11 @@
         ];
 
         imports = [
-          ./parts/devshell.nix
-          ./parts/devshell-check.nix
           ./parts/devshell/default.nix
           ./parts/lazygit-delta/default.nix
+
+          ./parts/opencode/devshell.nix
+          ./parts/opencode/checks.nix
 
           ./parts/languages/python.nix
           ./parts/languages/bun.nix
@@ -41,9 +42,9 @@
         ];
 
         flake.flakeModules = {
-          default = ./parts/devshell.nix;
-          devshell = ./parts/devshell.nix;
-          devshellCheck = ./parts/devshell-check.nix;
+          default = ./parts/opencode/devshell.nix;
+          devshell = ./parts/opencode/devshell.nix;
+          devshellCheck = ./parts/opencode/checks.nix;
         };
       };
     in
