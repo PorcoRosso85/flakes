@@ -27,6 +27,7 @@
         imports = [
           ./parts/devshell/default.nix
           ./parts/lazygit-delta/default.nix
+          ./parts/repo-checks.nix
 
           ./parts/opencode/devshell.nix
           ./parts/opencode/checks.nix
