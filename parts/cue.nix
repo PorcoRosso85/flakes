@@ -1,32 +1,13 @@
-{ inputs, ... }:
-{
-  perSystem =
-    { pkgs, ... }:
-    let
-      cue-v15 = pkgs.buildGoModule rec {
-        pname = "cue";
-        version = "0.15.1";
-        src = pkgs.fetchFromGitHub {
-          owner = "cue-lang";
-          repo = "cue";
-          rev = "v${version}";
-          hash = "sha256-0DxJK5S1uWR5MbI8VzUxQv+YTwIIm1yK77Td+Qf278I=";
-        };
-        vendorHash = "sha256-ivFw62+pg503EEpRsdGSQrFNah87RTUrRXUSPZMFLG4=";
-        subPackages = [ "cmd/cue" ];
-        ldflags = [
-          "-s"
-          "-w"
-          "-X cuelang.org/go/cmd/cue/cmd.version=v${version}"
-        ];
-      };
-    in
-    {
-      packages.cue-v15 = cue-v15;
+# DEPRECATED: use `parts/languages/cue.nix`
+#
+# Compatibility shim for external consumers that still import `./parts/cue.nix`.
+# This module delegates to `parts/languages/cue.nix`.
 
-      checks.cue-smoke = pkgs.runCommand "cue-smoke" { nativeBuildInputs = [ cue-v15 ]; } ''
-        cue version >/dev/null
-        touch $out
-      '';
-    };
-}
+builtins.trace
+  "DEPRECATED: import parts/languages/cue.nix (parts/cue.nix will be removed after migration)"
+  (
+    { ... }:
+    {
+      imports = [ ./languages/cue.nix ];
+    }
+  )
