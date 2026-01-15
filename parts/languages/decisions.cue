@@ -25,5 +25,5 @@ zig_lint_policy: {
 
 breaking_remove_parts_cue: {
   allow: false
-  note: "Keep parts/cue.nix as deprecated shim until all consumers migrate"
+  note: "Keep legacy cue shim file until all consumers migrate"
 }

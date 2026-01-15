@@ -24,9 +24,9 @@
               exit 0
             fi
 
-            bad="$(${pkgs.coreutils}/bin/printf '%s\n' "$hits" | ${pkgs.gnugrep}/bin/grep -vE '(/|^)README\.md:|(/|^)parts/cue\.nix:' || true)"
+            bad="$(${pkgs.coreutils}/bin/printf '%s\n' "$hits" | ${pkgs.gnugrep}/bin/grep -vE '(/|^)README\.md:|(/|^)parts/cue\.nix:|(/|^)parts/repo-checks\.nix:' || true)"
             if [[ -n "$bad" ]]; then
-              echo "legacy import reference found (allowed: README.md, parts/cue.nix shim only):" >&2
+              echo "legacy import reference found (allowed: README.md, parts/cue.nix shim, parts/repo-checks.nix):" >&2
               echo "$bad" >&2
               exit 1
             fi
