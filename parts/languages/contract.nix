@@ -6,32 +6,46 @@
       toolingNames = builtins.filter (n: lib.hasSuffix "-tooling" n) (builtins.attrNames config.packages);
       langs = map (n: lib.removeSuffix "-tooling" n) toolingNames;
 
-      requiredKeys = lang: [
-        {
-          name = "packages.${lang}-tooling";
-          ok = config.packages ? "${lang}-tooling";
-        }
-        {
-          name = "packages.${lang}-lsp";
-          ok = config.packages ? "${lang}-lsp";
-        }
-        {
-          name = "packages.${lang}-lint";
-          ok = config.packages ? "${lang}-lint";
-        }
-        {
-          name = "packages.${lang}-fmt";
-          ok = config.packages ? "${lang}-fmt";
-        }
-        {
-          name = "devShells.${lang}";
-          ok = config.devShells ? "${lang}";
-        }
-        {
-          name = "checks.${lang}-smoke";
-          ok = config.checks ? "${lang}-smoke";
-        }
-      ];
+      requiredKeys =
+        lang:
+        (
+          if lang == "nix" then
+            [
+              {
+                name = "formatter.${pkgs.system}";
+                ok = (config ? formatter) && config.formatter != null;
+              }
+            ]
+          else
+            [ ]
+        )
+        ++ [
+
+          {
+            name = "packages.${lang}-tooling";
+            ok = config.packages ? "${lang}-tooling";
+          }
+          {
+            name = "packages.${lang}-lsp";
+            ok = config.packages ? "${lang}-lsp";
+          }
+          {
+            name = "packages.${lang}-lint";
+            ok = config.packages ? "${lang}-lint";
+          }
+          {
+            name = "packages.${lang}-fmt";
+            ok = config.packages ? "${lang}-fmt";
+          }
+          {
+            name = "devShells.${lang}";
+            ok = config.devShells ? "${lang}";
+          }
+          {
+            name = "checks.${lang}-smoke";
+            ok = config.checks ? "${lang}-smoke";
+          }
+        ];
 
       missing = lib.concatMap (
         lang:
