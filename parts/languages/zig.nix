@@ -30,14 +30,29 @@
         packages = [ zigTooling ];
       };
 
-      checks.zig-smoke = pkgs.runCommand "zig-smoke" { nativeBuildInputs = [ zigTooling ]; } ''
-        set -euo pipefail
+      checks.zig-smoke =
+        pkgs.runCommand "zig-smoke"
+          {
+            nativeBuildInputs = [
+              zigTooling
+              zigFmt
+              zigLint
+            ];
+          }
+          ''
+            set -euo pipefail
 
-        zig version >/dev/null
-        zls --version >/dev/null
-        zig fmt --help >/dev/null
+            zig version >/dev/null
+            zls --version >/dev/null
+            zig fmt --help >/dev/null
 
-        touch "$out"
-      '';
+            tmp="$(mktemp -d)"
+            printf 'const std = @import("std");\n' >"$tmp/main.zig"
+
+            zig-fmt --check "$tmp/main.zig" >/dev/null
+            zig-lint "$tmp/main.zig" >/dev/null
+
+            touch "$out"
+          '';
     };
 }

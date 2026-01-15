@@ -17,3 +17,13 @@ nix_formatter_choice: {
   formatter: "nixfmt-rfc-style"
   note: "Prefer nixfmt-rfc-style as the Nix formatter SSOT"
 }
+
+zig_lint_policy: {
+  lint_command: "zig fmt --check"
+  note: "Zig has no dedicated linter; treat format-check as lint to satisfy contract v1"
+}
+
+breaking_remove_parts_cue: {
+  allow: false
+  note: "Keep parts/cue.nix as deprecated shim until all consumers migrate"
+}
