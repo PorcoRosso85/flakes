@@ -6,34 +6,6 @@
       src = ../.;
     in
     {
-      checks.no-internal-legacy-cue-import =
-        pkgs.runCommand "no-internal-legacy-cue-import"
-          {
-            nativeBuildInputs = [
-              pkgs.ripgrep
-              pkgs.gnugrep
-              pkgs.coreutils
-            ];
-          }
-          ''
-            set -euo pipefail
-
-            hits="$(${pkgs.ripgrep}/bin/rg -n 'parts/cue\.nix' "${src}" || true)"
-            if [[ -z "$hits" ]]; then
-              touch "$out"
-              exit 0
-            fi
-
-            bad="$(${pkgs.coreutils}/bin/printf '%s\n' "$hits" | ${pkgs.gnugrep}/bin/grep -vE '(/|^)README\.md:|(/|^)parts/cue\.nix:|(/|^)parts/repo-checks\.nix:' || true)"
-            if [[ -n "$bad" ]]; then
-              echo "legacy import reference found (allowed: README.md, parts/cue.nix shim, parts/repo-checks.nix):" >&2
-              echo "$bad" >&2
-              exit 1
-            fi
-
-            touch "$out"
-          '';
-
       checks.languages-decisions-no-unused-keys =
         pkgs.runCommand "languages-decisions-no-unused-keys"
           {
@@ -66,6 +38,41 @@
               echo "$bad_keys" >&2
               exit 1
             fi
+
+            touch "$out"
+          '';
+
+      checks.no-legacy-cue-artifacts =
+        pkgs.runCommand "no-legacy-cue-artifacts"
+          {
+            nativeBuildInputs = [
+              pkgs.ripgrep
+              pkgs.coreutils
+            ];
+          }
+          ''
+            set -euo pipefail
+
+            # File must not exist
+            legacy_path="${src}/parts/""cue.nix"
+            if [[ -e "$legacy_path" ]]; then
+              echo "unexpected legacy file exists: parts/""cue.nix" >&2
+              exit 1
+            fi
+
+            # Patterns must not exist anywhere in repo source.
+            pat1="parts/""cue.nix"
+            pat2="no-internal-legacy-cue-""import"
+            pat3="cue-""v15"
+
+            for pat in "$pat1" "$pat2" "$pat3"; do
+              hits="$(${pkgs.ripgrep}/bin/rg -n --fixed-strings "$pat" "${src}" || true)"
+              if [[ -n "$hits" ]]; then
+                echo "unexpected legacy artifact present: $pat" >&2
+                echo "$hits" >&2
+                exit 1
+              fi
+            done
 
             touch "$out"
           '';

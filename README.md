@@ -32,7 +32,6 @@ opencode run "hello" --model=openai/gpt-5.1-codex-low
 - `opencode.json`: Configuration with plugin pinned at `@4.2.0`
 - `flake.nix`: DevShell with opencode, jq, git
 - `parts/languages/*.nix`: Language tooling parts (v1 contract)
-- `parts/cue.nix`: DEPRECATED shim (use `parts/languages/cue.nix`)
 
 ## DoD
 

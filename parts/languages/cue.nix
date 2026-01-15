@@ -3,7 +3,7 @@
   perSystem =
     { pkgs, ... }:
     let
-      cue-v15 = pkgs.buildGoModule rec {
+      cuePkg = pkgs.buildGoModule rec {
         pname = "cue";
         version = "0.15.1";
         src = pkgs.fetchFromGitHub {
@@ -23,7 +23,7 @@
 
       cueTooling = pkgs.symlinkJoin {
         name = "cue-tooling";
-        paths = [ cue-v15 ];
+        paths = [ cuePkg ];
       };
 
       cueLsp = pkgs.writeShellScriptBin "cue-lsp" ''
@@ -40,9 +40,6 @@
       '';
     in
     {
-      # Backward-compatible output
-      packages.cue-v15 = cue-v15;
-
       packages.cue-tooling = cueTooling;
       packages.cue-lsp = cueLsp;
       packages.cue-lint = cueLint;
