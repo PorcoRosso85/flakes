@@ -1,7 +1,12 @@
 { lib, ... }:
 {
   perSystem =
-    { pkgs, config, ... }:
+    {
+      pkgs,
+      config,
+      self',
+      ...
+    }:
     let
       toolingNames = builtins.filter (n: lib.hasSuffix "-tooling" n) (builtins.attrNames config.packages);
       langs = map (n: lib.removeSuffix "-tooling" n) toolingNames;
@@ -13,7 +18,7 @@
             [
               {
                 name = "formatter.${pkgs.system}";
-                ok = (config ? formatter) && config.formatter != null;
+                ok = (self' ? formatter) && self'.formatter != null;
               }
             ]
           else
@@ -65,5 +70,19 @@
       checks.languages-contract = pkgs.runCommand "languages-contract" { } ''
         touch "$out"
       '';
+
+      # Explicitly reference flake output `formatter.${system}` to make sure
+      # the `nix fmt` entrypoint is actually produced.
+      checks.nix-formatter-smoke =
+        if builtins.elem "nix" langs then
+          pkgs.runCommand "nix-formatter-smoke" { nativeBuildInputs = [ self'.formatter ]; } ''
+            set -euo pipefail
+            nixfmt --version >/dev/null 2>&1 || nixfmt --help >/dev/null
+            touch "$out"
+          ''
+        else
+          pkgs.runCommand "nix-formatter-smoke-skipped" { } ''
+            touch "$out"
+          '';
     };
 }
