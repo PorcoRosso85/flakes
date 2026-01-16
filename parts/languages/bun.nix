@@ -20,6 +20,22 @@
       packages.bun-lint = pkgs.oxlint;
       packages.bun-fmt = pkgs.oxfmt;
 
+      helix.tools = [ bunTooling ];
+      helix.languageServers."typescript-language-server" = {
+        command = "typescript-language-server";
+        args = [ "--stdio" ];
+      };
+      helix.languages.typescript = {
+        languageServers = [ "typescript-language-server" ];
+        formatter = {
+          command = "oxfmt";
+          args = [
+            "--stdin-filepath"
+            "%{buffer_name}"
+          ];
+        };
+      };
+
       devShells.bun = pkgs.mkShell {
         packages = [ bunTooling ];
       };

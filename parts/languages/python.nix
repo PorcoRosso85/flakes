@@ -19,6 +19,22 @@
       packages.python-lint = pkgs.ruff;
       packages.python-fmt = pkgs.ruff;
 
+      helix.tools = [ pythonTooling ];
+      helix.languageServers.pyright = {
+        command = "pyright-langserver";
+        args = [ "--stdio" ];
+      };
+      helix.languages.python = {
+        languageServers = [ "pyright" ];
+        formatter = {
+          command = "ruff";
+          args = [
+            "format"
+            "-"
+          ];
+        };
+      };
+
       devShells.python = pkgs.mkShell {
         packages = [ pythonTooling ];
 
