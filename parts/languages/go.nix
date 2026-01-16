@@ -18,6 +18,19 @@
       packages.go-lint = pkgs.golangci-lint;
       packages.go-fmt = pkgs.go;
 
+      helix.tools = [ goTooling ];
+      helix.languageServers.gopls = {
+        command = "gopls";
+        args = [ ];
+      };
+      helix.languages.go = {
+        languageServers = [ "gopls" ];
+        formatter = {
+          command = "gofmt";
+          args = [ ];
+        };
+      };
+
       devShells.go = pkgs.mkShell {
         packages = [ goTooling ];
       };

@@ -21,6 +21,19 @@
       packages.nix-lint = pkgs.statix;
       packages.nix-fmt = pkgs.nixfmt-rfc-style;
 
+      helix.tools = [ nixTooling ];
+      helix.languageServers.nixd = {
+        command = "nixd";
+        args = [ ];
+      };
+      helix.languages.nix = {
+        languageServers = [ "nixd" ];
+        formatter = {
+          command = "nixfmt";
+          args = [ ];
+        };
+      };
+
       devShells.nix = pkgs.mkShell {
         packages = [ nixTooling ];
       };
