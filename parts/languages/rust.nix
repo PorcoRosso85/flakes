@@ -46,6 +46,22 @@
       packages.rust-lint = pkgs.clippy;
       packages.rust-fmt = pkgs.rustfmt;
 
+      helix.tools = [ rustTooling ];
+      helix.languageServers."rust-analyzer" = {
+        command = "rust-analyzer";
+        args = [ ];
+      };
+      helix.languages.rust = {
+        languageServers = [ "rust-analyzer" ];
+        formatter = {
+          command = "rustfmt";
+          args = [
+            "--emit"
+            "stdout"
+          ];
+        };
+      };
+
       devShells.rust = pkgs.mkShell {
         packages = [ rustTooling ];
       };

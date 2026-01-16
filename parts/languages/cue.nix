@@ -45,6 +45,26 @@
       packages.cue-lint = cueLint;
       packages.cue-fmt = cueFmt;
 
+      helix.tools = [ cueTooling ];
+      helix.languageServers.cuelsp = {
+        command = "cue";
+        args = [
+          "lsp"
+          "serve"
+        ];
+      };
+      helix.languages.cue = {
+        languageServers = [ "cuelsp" ];
+        formatter = {
+          command = "cue";
+          args = [
+            "fmt"
+            "--files"
+            "-"
+          ];
+        };
+      };
+
       devShells.cue = pkgs.mkShell {
         packages = [ cueTooling ];
       };

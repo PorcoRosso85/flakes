@@ -26,6 +26,22 @@
       packages.zig-lint = zigLint;
       packages.zig-fmt = zigFmt;
 
+      helix.tools = [ zigTooling ];
+      helix.languageServers.zls = {
+        command = "zls";
+        args = [ ];
+      };
+      helix.languages.zig = {
+        languageServers = [ "zls" ];
+        formatter = {
+          command = "zig";
+          args = [
+            "fmt"
+            "--stdin"
+          ];
+        };
+      };
+
       devShells.zig = pkgs.mkShell {
         packages = [ zigTooling ];
       };
