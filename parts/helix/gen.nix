@@ -1,4 +1,4 @@
-# Helix: generate languages.toml into the Nix store
+# Helix: generate store artifacts from SSOT
 #
 # Aggregates `helix.*` declarations from `parts/languages/*`.
 { lib, ... }:
@@ -32,9 +32,26 @@
         language = languageList;
       };
 
-      languagesToml = toml.generate "helix-languages.toml" helixToml;
+      commandsList = lib.unique (
+        (lib.mapAttrsToList (_: s: s.command) config.helix.languageServers)
+        ++ (lib.concatMap (l: if l.formatter == null then [ ] else [ l.formatter.command ]) (
+          lib.mapAttrsToList (_: v: v) config.helix.languages
+        ))
+      );
+
+      languagesTomlRaw = toml.generate "helix-languages.toml" helixToml;
+      commandsJsonRaw = pkgs.writeText "helix-commands.json" (builtins.toJSON commandsList);
+
+      helixStore = pkgs.runCommand "helix" { } ''
+        set -euo pipefail
+        mkdir -p "$out"
+        ln -s "${languagesTomlRaw}" "$out/languages.toml"
+        ln -s "${commandsJsonRaw}" "$out/commands.json"
+      '';
     in
     {
-      helix.languagesToml = languagesToml;
+      helix.languagesToml = "${helixStore}/languages.toml";
+      helix.commandsJson = "${helixStore}/commands.json";
+      helix.commandsList = commandsList;
     };
 }

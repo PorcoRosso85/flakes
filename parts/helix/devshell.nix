@@ -46,8 +46,14 @@
         "${pkgs.coreutils}/bin/rm" -f .helix/languages.store.toml
         "${pkgs.coreutils}/bin/ln" -s "${config.helix.languagesToml}" .helix/languages.store.toml
 
+        # Guard: forbid XDG languages.toml -> /nix/store/*
+        "${pkgs.bash}/bin/bash" ${./tests/forbid-xdg-store-direct-link.sh}
+
         "${pkgs.coreutils}/bin/rm" -f "$XDG_CONFIG_HOME/helix/languages.toml"
-        "${pkgs.coreutils}/bin/ln" -s "${config.helix.languagesToml}" "$XDG_CONFIG_HOME/helix/languages.toml"
+        "${pkgs.coreutils}/bin/ln" -s "$PWD/.helix/languages.toml" "$XDG_CONFIG_HOME/helix/languages.toml"
+
+        # Guard again after linking.
+        "${pkgs.bash}/bin/bash" ${./tests/forbid-xdg-store-direct-link.sh}
 
         exec "${pkgs.helix}/bin/hx" "$@"
       '';
