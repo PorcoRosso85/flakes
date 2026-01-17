@@ -33,6 +33,9 @@
           ./parts/opencode/checks.nix
 
           ./parts/helix/contract.nix
+          ./parts/helix/gen.nix
+          ./parts/helix/devshell.nix
+          ./parts/helix/checks.nix
 
           ./parts/languages/python.nix
           ./parts/languages/bun.nix
