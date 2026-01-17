@@ -17,7 +17,6 @@
       packages.python-tooling = pythonTooling;
       packages.python-lsp = pkgs.pyright;
       packages.python-diagnostics = pkgs.ruff;
-      packages.python-lint = pkgs.ruff;
       packages.python-fmt = pkgs.ruff;
 
       helix.tools = [ pythonTooling ];

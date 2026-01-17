@@ -44,7 +44,6 @@
       packages.rust-tooling = rustTooling;
       packages.rust-lsp = rustAnalyzer;
       packages.rust-diagnostics = pkgs.clippy;
-      packages.rust-lint = pkgs.clippy;
       packages.rust-fmt = pkgs.rustfmt;
 
       helix.tools = [ rustTooling ];

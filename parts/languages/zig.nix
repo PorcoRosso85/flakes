@@ -15,16 +15,15 @@
         exec zig fmt "$@"
       '';
 
-      zigLint = pkgs.writeShellScriptBin "zig-lint" ''
-        # YAGNI: start with fmt-as-lint (format check).
+      zigDiagnostics = pkgs.writeShellScriptBin "zig-diagnostics" ''
+        # YAGNI: start with fmt-as-diagnostics (format check).
         exec zig fmt --check "$@"
       '';
     in
     {
       packages.zig-tooling = zigTooling;
       packages.zig-lsp = pkgs.zls;
-      packages.zig-diagnostics = zigLint;
-      packages.zig-lint = zigLint;
+      packages.zig-diagnostics = zigDiagnostics;
       packages.zig-fmt = zigFmt;
 
       helix.tools = [ zigTooling ];
@@ -53,7 +52,7 @@
             nativeBuildInputs = [
               zigTooling
               zigFmt
-              zigLint
+              zigDiagnostics
             ];
           }
           ''
@@ -67,7 +66,7 @@
             printf 'const std = @import("std");\n' >"$tmp/main.zig"
 
             zig-fmt --check "$tmp/main.zig" >/dev/null
-            zig-lint "$tmp/main.zig" >/dev/null
+            zig-diagnostics "$tmp/main.zig" >/dev/null
 
             touch "$out"
           '';

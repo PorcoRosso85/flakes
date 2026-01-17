@@ -16,7 +16,6 @@
       packages.go-tooling = goTooling;
       packages.go-lsp = pkgs.gopls;
       packages.go-diagnostics = pkgs.golangci-lint;
-      packages.go-lint = pkgs.golangci-lint;
       packages.go-fmt = pkgs.go;
 
       helix.tools = [ goTooling ];

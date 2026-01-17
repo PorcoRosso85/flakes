@@ -35,8 +35,8 @@
             ok = config.packages ? "${lang}-lsp";
           }
           {
-            name = "packages.${lang}-lint";
-            ok = config.packages ? "${lang}-lint";
+            name = "packages.${lang}-diagnostics";
+            ok = config.packages ? "${lang}-diagnostics";
           }
           {
             name = "packages.${lang}-fmt";
@@ -59,8 +59,15 @@
         )
       ) langs;
 
+      lintOutputs = builtins.filter (n: lib.hasSuffix "-lint" n) (builtins.attrNames config.packages);
+
       _ =
-        if missing == [ ] then
+        if lintOutputs != [ ] then
+          builtins.throw (
+            "languages contract v2 failed: lint vocabulary is forbidden (use -diagnostics instead):\n"
+            + lib.concatStringsSep "\n" lintOutputs
+          )
+        else if missing == [ ] then
           true
         else
           builtins.throw ("languages contract v1 failed:\n" + lib.concatStringsSep "\n" missing);

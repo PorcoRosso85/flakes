@@ -18,7 +18,6 @@
       packages.bun-tooling = bunTooling;
       packages.bun-lsp = pkgs.typescript-language-server;
       packages.bun-diagnostics = pkgs.oxlint;
-      packages.bun-lint = pkgs.oxlint;
       packages.bun-fmt = pkgs.oxfmt;
 
       helix.tools = [ bunTooling ];

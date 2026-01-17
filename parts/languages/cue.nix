@@ -34,16 +34,15 @@
         exec cue fmt "$@"
       '';
 
-      cueLint = pkgs.writeShellScriptBin "cue-lint" ''
-        # Minimal lint wrapper: keep it generic, project supplies args.
+      cueDiagnostics = pkgs.writeShellScriptBin "cue-diagnostics" ''
+        # Minimal diagnostics wrapper: keep it generic, project supplies args.
         exec cue vet "$@"
       '';
     in
     {
       packages.cue-tooling = cueTooling;
       packages.cue-lsp = cueLsp;
-      packages.cue-diagnostics = cueLint;
-      packages.cue-lint = cueLint;
+      packages.cue-diagnostics = cueDiagnostics;
       packages.cue-fmt = cueFmt;
 
       helix.tools = [ cueTooling ];
