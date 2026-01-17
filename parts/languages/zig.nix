@@ -23,6 +23,7 @@
     {
       packages.zig-tooling = zigTooling;
       packages.zig-lsp = pkgs.zls;
+      packages.zig-diagnostics = zigLint;
       packages.zig-lint = zigLint;
       packages.zig-fmt = zigFmt;
 

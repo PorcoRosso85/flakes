@@ -42,6 +42,7 @@
     {
       packages.cue-tooling = cueTooling;
       packages.cue-lsp = cueLsp;
+      packages.cue-diagnostics = cueLint;
       packages.cue-lint = cueLint;
       packages.cue-fmt = cueFmt;
 

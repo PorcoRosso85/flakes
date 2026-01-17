@@ -18,6 +18,7 @@
 
       packages.nix-tooling = nixTooling;
       packages.nix-lsp = pkgs.nixd;
+      packages.nix-diagnostics = pkgs.statix;
       packages.nix-lint = pkgs.statix;
       packages.nix-fmt = pkgs.nixfmt-rfc-style;
 
