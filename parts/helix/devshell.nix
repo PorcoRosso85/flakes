@@ -20,40 +20,10 @@
 
         "${pkgs.coreutils}/bin/mkdir" -p "$XDG_CONFIG_HOME/helix" "$XDG_CACHE_HOME" "$XDG_STATE_HOME"
 
-        "${pkgs.coreutils}/bin/mkdir" -p .helix
+        export HELIX_GUARD_STORE_LANGUAGES_TOML="${config.helix.languagesToml}"
+        export HELIX_GUARD_XDG_CONFIG_HOME="$XDG_CONFIG_HOME"
 
-        if [[ -e .helix/languages.toml && ! -L .helix/languages.toml ]]; then
-          echo ".helix/languages.toml must be a symlink (tracked)" >&2
-          exit 1
-        fi
-
-        if [[ ! -L .helix/languages.toml ]]; then
-          echo "missing .helix/languages.toml (expected tracked symlink)" >&2
-          exit 1
-        fi
-
-        target="$("${pkgs.coreutils}/bin/readlink" .helix/languages.toml)"
-        if [[ "$target" != "languages.store.toml" && "$target" != "./languages.store.toml" ]]; then
-          echo ".helix/languages.toml must point to languages.store.toml (got: $target)" >&2
-          exit 1
-        fi
-
-        if [[ -e .helix/languages.store.toml && ! -L .helix/languages.store.toml ]]; then
-          echo ".helix/languages.store.toml must be a symlink (ignored)" >&2
-          exit 1
-        fi
-
-        "${pkgs.coreutils}/bin/rm" -f .helix/languages.store.toml
-        "${pkgs.coreutils}/bin/ln" -s "${config.helix.languagesToml}" .helix/languages.store.toml
-
-        # Guard: forbid XDG languages.toml -> /nix/store/*
-        "${pkgs.bash}/bin/bash" ${./tests/forbid-xdg-store-direct-link.sh}
-
-        "${pkgs.coreutils}/bin/rm" -f "$XDG_CONFIG_HOME/helix/languages.toml"
-        "${pkgs.coreutils}/bin/ln" -s "$PWD/.helix/languages.toml" "$XDG_CONFIG_HOME/helix/languages.toml"
-
-        # Guard again after linking.
-        "${pkgs.bash}/bin/bash" ${./tests/forbid-xdg-store-direct-link.sh}
+        "${pkgs.bash}/bin/bash" ${./guards/helix-guard.sh} apply
 
         exec "${pkgs.helix}/bin/hx" "$@"
       '';
@@ -63,33 +33,16 @@
         packages = lib.unique ([ hx ] ++ config.helix.tools);
 
         shellHook = ''
-          set -euo pipefail
+            set -euo pipefail
 
-          "${pkgs.coreutils}/bin/mkdir" -p .helix
+            export HELIX_GUARD_STORE_LANGUAGES_TOML="${config.helix.languagesToml}"
 
-          if [[ -e .helix/languages.toml && ! -L .helix/languages.toml ]]; then
-            echo ".helix/languages.toml must be a symlink (tracked)" >&2
-            exit 1
-          fi
+          export PATH="${pkgs.coreutils}/bin:${pkgs.bash}/bin:$PATH"
 
-          if [[ ! -L .helix/languages.toml ]]; then
-            echo "missing .helix/languages.toml (expected tracked symlink)" >&2
-            exit 1
-          fi
+          export PATH="${pkgs.coreutils}/bin:${pkgs.bash}/bin:$PATH"
 
-          target="$("${pkgs.coreutils}/bin/readlink" .helix/languages.toml)"
-          if [[ "$target" != "languages.store.toml" && "$target" != "./languages.store.toml" ]]; then
-            echo ".helix/languages.toml must point to languages.store.toml (got: $target)" >&2
-            exit 1
-          fi
+          "${pkgs.bash}/bin/bash" ${./guards/helix-guard.sh} apply
 
-          if [[ -e .helix/languages.store.toml && ! -L .helix/languages.store.toml ]]; then
-            echo ".helix/languages.store.toml must be a symlink (ignored)" >&2
-            exit 1
-          fi
-
-          "${pkgs.coreutils}/bin/rm" -f .helix/languages.store.toml
-          "${pkgs.coreutils}/bin/ln" -s "${config.helix.languagesToml}" .helix/languages.store.toml
         '';
       };
     };

@@ -43,30 +43,26 @@
             );
           }
           ''
-                        set -euo pipefail
+            set -euo pipefail
 
-                        export HOME="$TMPDIR/helix-home"
-                        export XDG_CONFIG_HOME="$HOME/.config"
-                        export XDG_CACHE_HOME="$HOME/.cache"
-                        export XDG_STATE_HOME="$HOME/.local/state"
-                        mkdir -p "$XDG_CONFIG_HOME/helix" "$XDG_CACHE_HOME" "$XDG_STATE_HOME"
+            export HOME="$TMPDIR/helix-home"
+            export XDG_CONFIG_HOME="$HOME/.config"
+            export XDG_CACHE_HOME="$HOME/.cache"
+            export XDG_STATE_HOME="$HOME/.local/state"
+            mkdir -p "$XDG_CONFIG_HOME/helix" "$XDG_CACHE_HOME" "$XDG_STATE_HOME"
 
-                        mkdir -p .helix
-                        ln -s languages.store.toml .helix/languages.toml
-                        ln -s ${config.helix.languagesToml} .helix/languages.store.toml
+            export HELIX_GUARD_STORE_LANGUAGES_TOML="${config.helix.languagesToml}"
+            export HELIX_GUARD_XDG_CONFIG_HOME="$XDG_CONFIG_HOME"
+            export HELIX_GUARD_ALLOW_INIT_TRACKED_SYMLINK=1
 
-                        ln -s "$PWD/.helix/languages.toml" "$XDG_CONFIG_HOME/helix/languages.toml"
-
-            # Guard: forbid XDG languages.toml -> /nix/store/*
-            ${pkgs.bash}/bin/bash ${./tests/forbid-xdg-store-direct-link.sh}
+            ${pkgs.bash}/bin/bash ${./guards/helix-guard.sh} apply
 
             export HELIX_REQUIRED_COMMANDS_FILE="${requiredCommandsFile}"
 
+            # Run without category for stability.
+            TERM=dumb NO_COLOR=1 hx --health 2>&1 | ${pkgs.bash}/bin/bash ${./tests/hx-health-contract.sh}
 
-                        # Run without category for stability.
-                        TERM=dumb NO_COLOR=1 hx --health 2>&1 | ${pkgs.bash}/bin/bash ${./tests/hx-health-contract.sh}
-
-                        touch "$out"
+            touch "$out"
           '';
     in
     {
@@ -90,12 +86,43 @@
 
             ln -s ${config.helix.languagesToml} "$XDG_CONFIG_HOME/helix/languages.toml"
 
-            if ${pkgs.bash}/bin/bash ${./tests/forbid-xdg-store-direct-link.sh}; then
+            if ${pkgs.bash}/bin/bash ${./guards/helix-guard.sh} check-xdg; then
               echo "expected store-direct XDG link to be rejected" >&2
               exit 1
             fi
 
             touch "$out"
           '';
+
+      checks.helix-guard-dry =
+        pkgs.runCommand "helix-guard-dry"
+          {
+            nativeBuildInputs = [
+              pkgs.bash
+              pkgs.coreutils
+              pkgs.ripgrep
+            ];
+          }
+          ''
+            set -euo pipefail
+
+            files=(
+              ${./devshell.nix}
+              ${./checks.nix}
+              ${./tests/forbid-xdg-store-direct-link.sh}
+            )
+
+            # Must call the shared guard implementation.
+            rg -n "helix-guard\\.sh" "''${files[@]}" >/dev/null
+
+            # Must not duplicate guard logic/messages outside the guard.
+            if rg -n "\\.helix/languages\\.toml must be a symlink|missing \\.helix/languages\\.toml|readlink \\.helix" "''${files[@]}"; then
+              echo "guard DRY violation: guard logic found outside guards/helix-guard.sh" >&2
+              exit 1
+            fi
+
+            touch "$out"
+          '';
+
     };
 }
