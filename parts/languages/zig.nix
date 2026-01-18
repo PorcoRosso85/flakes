@@ -42,10 +42,6 @@
         };
       };
 
-      devShells.zig = pkgs.mkShell {
-        packages = [ zigTooling ];
-      };
-
       checks.zig-smoke =
         pkgs.runCommand "zig-smoke"
           {

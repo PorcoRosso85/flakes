@@ -31,10 +31,6 @@
         };
       };
 
-      devShells.go = pkgs.mkShell {
-        packages = [ goTooling ];
-      };
-
       checks.go-smoke = pkgs.runCommand "go-smoke" { nativeBuildInputs = [ goTooling ]; } ''
         set -euo pipefail
 

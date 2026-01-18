@@ -65,10 +65,6 @@
         };
       };
 
-      devShells.cue = pkgs.mkShell {
-        packages = [ cueTooling ];
-      };
-
       checks.cue-smoke = pkgs.runCommand "cue-smoke" { nativeBuildInputs = [ cueTooling ]; } ''
         set -euo pipefail
 

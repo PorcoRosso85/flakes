@@ -43,10 +43,6 @@
             ok = config.packages ? "${lang}-fmt";
           }
           {
-            name = "devShells.${lang}";
-            ok = config.devShells ? "${lang}";
-          }
-          {
             name = "checks.${lang}-smoke";
             ok = config.checks ? "${lang}-smoke";
           }

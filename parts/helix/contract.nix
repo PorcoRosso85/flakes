@@ -8,7 +8,13 @@
         tools = lib.mkOption {
           type = lib.types.listOf lib.types.package;
           default = [ ];
-          description = "Packages to add to devShells.helix PATH.";
+          description = "Packages declared by language parts (SSOT inputs).";
+        };
+
+        requiredPkgs = lib.mkOption {
+          type = lib.types.listOf lib.types.package;
+          readOnly = true;
+          description = "Minimal package set derived from helix SSOT (used by checks).";
         };
 
         languageServers = lib.mkOption {

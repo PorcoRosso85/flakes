@@ -39,10 +39,13 @@
         ))
       );
 
+      requiredPkgs = lib.unique config.helix.tools;
+
       languagesToml = toml.generate "helix-languages.toml" helixToml;
     in
     {
       helix.languagesToml = languagesToml;
       helix.commandsList = commandsList;
+      helix.requiredPkgs = requiredPkgs;
     };
 }

@@ -35,13 +35,6 @@
         };
       };
 
-      devShells.python = pkgs.mkShell {
-        packages = [ pythonTooling ];
-
-        UV_PYTHON_PREFERENCE = "only-system";
-        UV_PYTHON_DOWNLOADS = "never";
-      };
-
       checks.python-smoke = pkgs.runCommand "python-smoke" { nativeBuildInputs = [ pythonTooling ]; } ''
         set -euo pipefail
 

@@ -1,9 +1,26 @@
 { ... }:
 {
   perSystem =
-    { pkgs, ... }:
+    { pkgs, config, ... }:
     let
       src = ../.;
+
+      allowedDevShells = [
+        "default"
+        "edit"
+      ];
+
+      actualDevShells = builtins.attrNames config.devShells;
+      extraDevShells = builtins.filter (n: !(builtins.elem n allowedDevShells)) actualDevShells;
+
+      _ =
+        if extraDevShells == [ ] then
+          true
+        else
+          builtins.throw (
+            "devShells output contract failed: only default/edit are allowed, found extra:\n"
+            + (builtins.concatStringsSep "\n" extraDevShells)
+          );
     in
     {
       checks.languages-decisions-no-unused-keys =
@@ -22,7 +39,7 @@
             test -f "$decisions"
 
             # Collect top-level cue field names: <ident>:
-            keys="$(${pkgs.ripgrep}/bin/rg -o '^[A-Za-z_][A-Za-z0-9_]*(?=\s*:)' "$decisions" | ${pkgs.coreutils}/bin/sort -u || true)"
+            keys="$(${pkgs.ripgrep}/bin/rg --pcre2 -o '^[A-Za-z_][A-Za-z0-9_]*(?=\s*:)' "$decisions" | ${pkgs.coreutils}/bin/sort -u || true)"
 
             allowed_file="$TMPDIR/allowed"
             ${pkgs.coreutils}/bin/cat >"$allowed_file" <<'EOF'

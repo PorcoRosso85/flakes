@@ -16,7 +16,7 @@
         pkgs.runCommand "helix-commands-on-path"
           {
             nativeBuildInputs = lib.unique (
-              config.helix.tools
+              config.helix.requiredPkgs
               ++ [
                 pkgs.bash
                 pkgs.coreutils
@@ -33,11 +33,10 @@
         pkgs.runCommand "hx-health-anywhere"
           {
             nativeBuildInputs = lib.unique (
-              config.helix.tools
+              config.helix.requiredPkgs
               ++ [
-                pkgs.helix
+                config.packages.editor-tools
                 pkgs.bash
-                pkgs.coreutils
                 pkgs.gnused
               ]
             );
@@ -45,18 +44,9 @@
           ''
             set -euo pipefail
 
-            export HOME="$TMPDIR/helix-home"
-            export XDG_CONFIG_HOME="$HOME/.config"
-            export XDG_CACHE_HOME="$HOME/.cache"
-            export XDG_STATE_HOME="$HOME/.local/state"
-            mkdir -p "$XDG_CONFIG_HOME/helix" "$XDG_CACHE_HOME" "$XDG_STATE_HOME"
-
-            rm -f "$XDG_CONFIG_HOME/helix/languages.toml"
-            ln -s ${config.helix.languagesToml} "$XDG_CONFIG_HOME/helix/languages.toml"
-
             export HELIX_REQUIRED_COMMANDS_FILE="${requiredCommandsFile}"
 
-            # Run without category for stability.
+            # Source of truth for injection is the hx wrapper.
             TERM=dumb NO_COLOR=1 hx --health 2>&1 | ${pkgs.bash}/bin/bash ${./tests/hx-health-contract.sh}
 
             touch "$out"

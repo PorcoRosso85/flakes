@@ -34,10 +34,6 @@
         };
       };
 
-      devShells.nix = pkgs.mkShell {
-        packages = [ nixTooling ];
-      };
-
       checks.nix-smoke = pkgs.runCommand "nix-smoke" { nativeBuildInputs = [ nixTooling ]; } ''
         set -euo pipefail
 

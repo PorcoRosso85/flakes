@@ -36,10 +36,6 @@
         };
       };
 
-      devShells.bun = pkgs.mkShell {
-        packages = [ bunTooling ];
-      };
-
       checks.bun-smoke = pkgs.runCommand "bun-smoke" { nativeBuildInputs = [ bunTooling ]; } ''
         set -euo pipefail
 

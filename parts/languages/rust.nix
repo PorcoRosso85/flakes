@@ -62,10 +62,6 @@
         };
       };
 
-      devShells.rust = pkgs.mkShell {
-        packages = [ rustTooling ];
-      };
-
       checks.rust-smoke = smoke;
     };
 }
