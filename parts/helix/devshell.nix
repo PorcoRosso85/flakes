@@ -1,8 +1,9 @@
 # Helix devShell
 #
-# Provides `devShells.helix` and keeps the repo git-clean by using:
-#   .helix/languages.toml        (tracked) -> languages.store.toml
-#   .helix/languages.store.toml  (ignored) -> /nix/store/.../helix-languages.toml
+# Provides `devShells.helix` and a `hx` wrapper that:
+# - runs anywhere (no `$PWD/.helix` dependency)
+# - isolates HOME/XDG_* into TMPDIR (no user config/caches)
+# - injects store-generated `languages.toml` into `$XDG_CONFIG_HOME/helix/languages.toml`
 { lib, ... }:
 {
   perSystem =
@@ -11,7 +12,6 @@
       hx = pkgs.writeShellScriptBin "hx" ''
         set -euo pipefail
 
-        # XDG/HOME isolation (Helix only): keep real $HOME untouched.
         export TMPDIR=''${TMPDIR:-/tmp}
         export HOME="$TMPDIR/helix-home"
         export XDG_CONFIG_HOME="$HOME/.config"
@@ -20,10 +20,8 @@
 
         "${pkgs.coreutils}/bin/mkdir" -p "$XDG_CONFIG_HOME/helix" "$XDG_CACHE_HOME" "$XDG_STATE_HOME"
 
-        export HELIX_GUARD_STORE_LANGUAGES_TOML="${config.helix.languagesToml}"
-        export HELIX_GUARD_XDG_CONFIG_HOME="$XDG_CONFIG_HOME"
-
-        "${pkgs.bash}/bin/bash" ${./guards/helix-guard.sh} apply
+        "${pkgs.coreutils}/bin/rm" -f "$XDG_CONFIG_HOME/helix/languages.toml"
+        "${pkgs.coreutils}/bin/ln" -s "${config.helix.languagesToml}" "$XDG_CONFIG_HOME/helix/languages.toml"
 
         exec "${pkgs.helix}/bin/hx" "$@"
       '';
@@ -32,17 +30,20 @@
       devShells.helix = pkgs.mkShell {
         packages = lib.unique ([ hx ] ++ config.helix.tools);
 
+        # Keep interactive `nix develop .#helix` isolated as well.
         shellHook = ''
-            set -euo pipefail
+          set -euo pipefail
 
-            export HELIX_GUARD_STORE_LANGUAGES_TOML="${config.helix.languagesToml}"
+          export TMPDIR=''${TMPDIR:-/tmp}
+          export HOME="$TMPDIR/helix-home"
+          export XDG_CONFIG_HOME="$HOME/.config"
+          export XDG_CACHE_HOME="$HOME/.cache"
+          export XDG_STATE_HOME="$HOME/.local/state"
 
-          export PATH="${pkgs.coreutils}/bin:${pkgs.bash}/bin:$PATH"
+          "${pkgs.coreutils}/bin/mkdir" -p "$XDG_CONFIG_HOME/helix" "$XDG_CACHE_HOME" "$XDG_STATE_HOME"
 
-          export PATH="${pkgs.coreutils}/bin:${pkgs.bash}/bin:$PATH"
-
-          "${pkgs.bash}/bin/bash" ${./guards/helix-guard.sh} apply
-
+          "${pkgs.coreutils}/bin/rm" -f "$XDG_CONFIG_HOME/helix/languages.toml"
+          "${pkgs.coreutils}/bin/ln" -s "${config.helix.languagesToml}" "$XDG_CONFIG_HOME/helix/languages.toml"
         '';
       };
     };
