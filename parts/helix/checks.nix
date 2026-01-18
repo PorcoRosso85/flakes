@@ -29,8 +29,8 @@
             touch "$out"
           '';
 
-      hxHealthContract =
-        pkgs.runCommand "hx-health-output-contract"
+      hxHealthAnywhere =
+        pkgs.runCommand "hx-health-anywhere"
           {
             nativeBuildInputs = lib.unique (
               config.helix.tools
@@ -51,11 +51,8 @@
             export XDG_STATE_HOME="$HOME/.local/state"
             mkdir -p "$XDG_CONFIG_HOME/helix" "$XDG_CACHE_HOME" "$XDG_STATE_HOME"
 
-            export HELIX_GUARD_STORE_LANGUAGES_TOML="${config.helix.languagesToml}"
-            export HELIX_GUARD_XDG_CONFIG_HOME="$XDG_CONFIG_HOME"
-            export HELIX_GUARD_ALLOW_INIT_TRACKED_SYMLINK=1
-
-            ${pkgs.bash}/bin/bash ${./guards/helix-guard.sh} apply
+            rm -f "$XDG_CONFIG_HOME/helix/languages.toml"
+            ln -s ${config.helix.languagesToml} "$XDG_CONFIG_HOME/helix/languages.toml"
 
             export HELIX_REQUIRED_COMMANDS_FILE="${requiredCommandsFile}"
 
@@ -67,7 +64,7 @@
     in
     {
       checks.helix-commands-on-path = helixCommandsOnPath;
-      checks.hx-health-output-contract = hxHealthContract;
+      checks.hx-health-anywhere = hxHealthAnywhere;
 
       checks.forbid-xdg-store-direct-link =
         pkgs.runCommand "forbid-xdg-store-direct-link"
