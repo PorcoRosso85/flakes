@@ -39,19 +39,10 @@
         ))
       );
 
-      languagesTomlRaw = toml.generate "helix-languages.toml" helixToml;
-      commandsJsonRaw = pkgs.writeText "helix-commands.json" (builtins.toJSON commandsList);
-
-      helixStore = pkgs.runCommand "helix" { } ''
-        set -euo pipefail
-        mkdir -p "$out"
-        ln -s "${languagesTomlRaw}" "$out/languages.toml"
-        ln -s "${commandsJsonRaw}" "$out/commands.json"
-      '';
+      languagesToml = toml.generate "helix-languages.toml" helixToml;
     in
     {
-      helix.languagesToml = "${helixStore}/languages.toml";
-      helix.commandsJson = "${helixStore}/commands.json";
+      helix.languagesToml = languagesToml;
       helix.commandsList = commandsList;
     };
 }

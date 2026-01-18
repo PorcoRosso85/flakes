@@ -69,11 +69,6 @@
           description = "Command names required by Helix tooling (CI truth).";
         };
 
-        commandsJson = lib.mkOption {
-          type = lib.types.path;
-          readOnly = true;
-          description = "Optional JSON artifact mirroring `helix.commandsList` (debug-only; CI must not depend on it).";
-        };
       };
     };
 }
