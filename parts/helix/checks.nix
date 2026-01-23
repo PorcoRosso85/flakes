@@ -51,10 +51,45 @@
 
             touch "$out"
           '';
+
+      hxWrapperInjectsLanguages =
+        pkgs.runCommand "hx-wrapper-injects-languages"
+          {
+            nativeBuildInputs = [
+              config.packages.editor-tools
+              pkgs.coreutils
+            ];
+          }
+          ''
+            set -euo pipefail
+
+            tmp="$TMPDIR/helix-wrapper"
+            mkdir -p "$tmp"
+
+            export TMPDIR="$tmp"
+
+            # If the wrapper doesn't override HOME/XDG, Helix may touch this.
+            export HOME="$PWD/trap-home"
+            mkdir -p "$HOME"
+            test ! -e "$HOME/.config"
+
+            hx --version >/dev/null
+
+            injected="$tmp/helix-home/.config/helix/languages.toml"
+            test -L "$injected"
+
+            target="$(${pkgs.coreutils}/bin/readlink "$injected")"
+            test "$target" = "${config.helix.languagesToml}"
+
+            test ! -e "$HOME/.config"
+
+            touch "$out"
+          '';
     in
     {
       checks.helix-commands-on-path = helixCommandsOnPath;
       checks.hx-health-anywhere = hxHealthAnywhere;
+      checks.hx-wrapper-injects-languages = hxWrapperInjectsLanguages;
 
     };
 }

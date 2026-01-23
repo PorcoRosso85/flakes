@@ -22,6 +22,7 @@
       imports = [
         ./parts/devshell/default.nix
         ./parts/repo-checks.nix
+        ./parts/tests/apps.nix
 
         ./parts/opencode/checks.nix
 
