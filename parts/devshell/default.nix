@@ -1,37 +1,8 @@
-{ inputs, lib, ... }:
+{ ... }:
 {
   perSystem =
     { pkgs, config, ... }:
     let
-      sys = pkgs.system;
-      oc = inputs.opencode;
-
-      hasOpencodePkg =
-        oc ? packages.${sys} && (oc.packages.${sys} ? opencode || oc.packages.${sys} ? default);
-      hasOpencodeApp = oc ? apps.${sys} && (oc.apps.${sys} ? opencode || oc.apps.${sys} ? opencode-dev);
-
-      opencodeUpstream =
-        if hasOpencodePkg then
-          oc.packages.${sys}.opencode or oc.packages.${sys}.default
-        else if hasOpencodeApp then
-          pkgs.writeShellApplication {
-            name = "opencode";
-            text = ''exec ${oc.apps.${sys}.opencode or oc.apps.${sys}.opencode-dev.program} "$@"'';
-          }
-        else
-          throw "inputs.opencode must expose packages.${sys}.opencode/default or apps.${sys}.opencode/opencode-dev";
-
-      opencodeConfig = ../../opencode.json;
-
-      opencode = pkgs.writeShellApplication {
-        name = "opencode";
-        meta.mainProgram = "opencode";
-        text = ''
-          export OPENCODE_CONFIG="${opencodeConfig}"
-          exec ${opencodeUpstream}/bin/opencode "$@"
-        '';
-      };
-
       hx = pkgs.writeShellScriptBin "hx" ''
         set -euo pipefail
 
@@ -49,6 +20,15 @@
         "${pkgs.coreutils}/bin/ln" -s "${config.helix.languagesToml}" "$XDG_CONFIG_HOME/helix/languages.toml"
 
         exec "${pkgs.helix}/bin/hx" "$@"
+      '';
+
+      opencodeConfig = ../../opencode.json;
+
+      opencode = pkgs.writeShellScriptBin "opencode" ''
+        set -euo pipefail
+
+        export OPENCODE_CONFIG="${opencodeConfig}"
+        exec "${pkgs.opencode}/bin/opencode" "$@"
       '';
 
       gitTools = pkgs.symlinkJoin {

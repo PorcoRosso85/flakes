@@ -9,10 +9,6 @@
       inputs.nixpkgs-lib.follows = "nixpkgs";
     };
 
-    opencode = {
-      url = "github:anomalyco/opencode/v1.1.6";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
   };
 
   outputs =

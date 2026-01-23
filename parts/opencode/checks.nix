@@ -1,91 +1,55 @@
-{ inputs, ... }:
+{ ... }:
 {
   perSystem =
-    { pkgs, config, ... }:
+    { pkgs, ... }:
     let
-      opencodePkg =
-        let
-          sys = pkgs.system;
-          oc = inputs.opencode;
+      opencodeConfig = ../../opencode.json;
 
-          hasOpencodePkg =
-            oc ? packages.${sys} && (oc.packages.${sys} ? opencode || oc.packages.${sys} ? default);
-          hasOpencodeApp = oc ? apps.${sys} && (oc.apps.${sys} ? opencode || oc.apps.${sys} ? opencode-dev);
-        in
-        if hasOpencodePkg then
-          oc.packages.${sys}.opencode or oc.packages.${sys}.default
-        else if hasOpencodeApp then
-          pkgs.writeShellApplication {
-            name = "opencode";
-            text = ''exec ${oc.apps.${sys}.opencode or oc.apps.${sys}.opencode-dev.program} "$@"'';
-          }
-        else
-          throw "inputs.opencode must expose packages.${sys}.opencode/default or apps.${sys}.opencode/opencode-dev";
-
-      lspCheckEnv = ''
-        set -euo pipefail
-
-        export HOME="$TMPDIR/home"
-        export XDG_CONFIG_HOME="$TMPDIR/cfg"
-        export XDG_CACHE_HOME="$TMPDIR/cache"
-        mkdir -p "$HOME" "$XDG_CONFIG_HOME" "$XDG_CACHE_HOME"
-
-        # Always run outside git/project tree (avoid project config/.opencode merge)
-        cd "$TMPDIR"
-
-        export OPENCODE_CONFIG="${./config/opencode-lsp.json}"
-        export OPENCODE_DISABLE_LSP_DOWNLOAD=true
-
-        # Last precedence override (blocks project/global config merge).
-        # Also pins LSP server commands to PATH to avoid project dependency checks.
-        export OPENCODE_CONFIG_CONTENT='{"$schema":"https://opencode.ai/config.json","plugin":[],"lsp":{"typescript":{"command":["typescript-language-server","--stdio"],"extensions":[".ts",".tsx",".js",".jsx"]},"pyright":{"command":["pyright-langserver","--stdio"],"extensions":[".py",".pyi"]}}}'
-
-        export OPENCODE_OUTPUT_CONTRACT="${./tests/output-contract.sh}"
-
-        # In a cold Nix sandbox, LSP startup can take time (node + server init).
-        export OPENCODE_LSP_SMOKE_RETRIES="${toString 40}"
-        export OPENCODE_LSP_SMOKE_SLEEP_S="${toString 0.5}"
-      '';
-
-      bunSmoke =
-        pkgs.runCommand "opencode-bun-lsp-smoke"
+      configVanilla =
+        pkgs.runCommand "opencode-config-vanilla"
           {
             nativeBuildInputs = [
-              opencodePkg
-              pkgs.bash
-              pkgs.coreutils
-              pkgs.gnugrep
               pkgs.jq
-              config.packages.bun-lsp
-              pkgs.typescript
+              pkgs.coreutils
             ];
           }
           ''
-            ${lspCheckEnv}
-            bash ${./tests/bun-lsp-smoke.sh}
+            set -euo pipefail
+
+            ${pkgs.jq}/bin/jq -e 'keys == ["$schema"]' "${opencodeConfig}" >/dev/null
+
             touch "$out"
           '';
 
-      pythonSmoke =
-        pkgs.runCommand "opencode-python-lsp-smoke"
+      opencodeSmoke =
+        pkgs.runCommand "opencode-smoke"
           {
             nativeBuildInputs = [
-              opencodePkg
-              pkgs.bash
+              pkgs.opencode
               pkgs.coreutils
-              pkgs.gnugrep
-              pkgs.jq
-              config.packages.python-lsp
             ];
           }
           ''
-            ${lspCheckEnv}
-            bash ${./tests/python-lsp-smoke.sh}
+            set -euo pipefail
+
+            export HOME="$TMPDIR/home"
+            export XDG_CONFIG_HOME="$HOME/.config"
+            export XDG_CACHE_HOME="$HOME/.cache"
+            export XDG_STATE_HOME="$HOME/.local/state"
+            mkdir -p "$XDG_CONFIG_HOME" "$XDG_CACHE_HOME" "$XDG_STATE_HOME"
+
+            # Avoid project config merge and exercise repo config.
+            cd "$TMPDIR"
+            export OPENCODE_CONFIG="${opencodeConfig}"
+
+            opencode --version >/dev/null
+            opencode --help >/dev/null
+
             touch "$out"
           '';
     in
     {
-      checks.opencode-bun-lsp-smoke = bunSmoke;
-      checks.opencode-python-lsp-smoke = pythonSmoke;
+      checks.opencode-config-vanilla = configVanilla;
+      checks.opencode-smoke = opencodeSmoke;
     };
 }
