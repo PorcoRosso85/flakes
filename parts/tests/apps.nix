@@ -16,11 +16,15 @@
           export TMPDIR="$tmp"
 
           hx --version >/dev/null
+
+          # Keep opencode tests isolated from user HOME.
+          export HOME="$tmp/opencode-home"
+          mkdir -p "$HOME"
+
           opencode --version >/dev/null
           opencode --help >/dev/null
 
           test -L "$tmp/helix-home/.config/helix/languages.toml"
-          test -d "$tmp/opencode-home/.config/opencode"
 
           echo "ok"
         '';
@@ -44,12 +48,16 @@
           test ! -e "$HOME/.config"
 
           hx --version >/dev/null
+
+          # Keep opencode tests isolated from user HOME.
+          export HOME="$tmp/opencode-home"
+          mkdir -p "$HOME"
+
           opencode --version >/dev/null
 
           test -L "$tmp/helix-home/.config/helix/languages.toml"
-          test -d "$tmp/opencode-home/.config/opencode"
 
-          test ! -e "$HOME/.config"
+          test ! -e "$tmp/trap-home/.config"
 
           echo "ok"
         '';

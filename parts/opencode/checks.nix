@@ -1,7 +1,7 @@
 { ... }:
 {
   perSystem =
-    { pkgs, config, ... }:
+    { pkgs, ... }:
     let
       opencodeConfig = ../../opencode.json;
 
@@ -48,37 +48,9 @@
             touch "$out"
           '';
 
-      opencodeWrapperIsolated =
-        pkgs.runCommand "opencode-wrapper-isolated"
-          {
-            nativeBuildInputs = [
-              config.packages.editor-tools
-              pkgs.coreutils
-            ];
-          }
-          ''
-            set -euo pipefail
-
-            tmp="$TMPDIR/opencode-wrapper"
-            mkdir -p "$tmp"
-
-            export TMPDIR="$tmp"
-
-            export HOME="$PWD/trap-home"
-            mkdir -p "$HOME"
-            test ! -e "$HOME/.config"
-
-            opencode --version >/dev/null
-
-            test -d "$tmp/opencode-home/.config/opencode"
-            test ! -e "$HOME/.config"
-
-            touch "$out"
-          '';
     in
     {
       checks.opencode-config-vanilla = configVanilla;
       checks.opencode-smoke = opencodeSmoke;
-      checks.opencode-wrapper-isolated = opencodeWrapperIsolated;
     };
 }

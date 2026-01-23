@@ -27,23 +27,7 @@
       opencode = pkgs.writeShellScriptBin "opencode" ''
         set -euo pipefail
 
-        export TMPDIR=''${TMPDIR:-/tmp}
-
-        # Isolation: do not read user ~/.config
-        export HOME="$TMPDIR/opencode-home"
-        export XDG_CONFIG_HOME="$HOME/.config"
-        export XDG_CACHE_HOME="$HOME/.cache"
-        export XDG_STATE_HOME="$HOME/.local/state"
-
-        "${pkgs.coreutils}/bin/mkdir" -p "$XDG_CONFIG_HOME/opencode" "$XDG_CACHE_HOME" "$XDG_STATE_HOME"
-
         export OPENCODE_CONFIG="${opencodeConfig}"
-
-        # Default to disabling project config merge for determinism.
-        # Users can override by exporting OPENCODE_DISABLE_PROJECT_CONFIG=false.
-        : "''${OPENCODE_DISABLE_PROJECT_CONFIG:=true}"
-        export OPENCODE_DISABLE_PROJECT_CONFIG
-
         exec "${pkgs.opencode}/bin/opencode" "$@"
       '';
 
