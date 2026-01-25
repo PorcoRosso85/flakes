@@ -2,29 +2,34 @@
 
 OpenCode + opencode-openai-codex-auth configuration for OAuth authentication with ChatGPT Plus/Pro (Codex Subscription).
 
+## Entrypoints
+
+### CI / DoD
+
+```bash
+nix flake check
+nix run .#test-integration
+nix run .#test-e2e
+```
+
+### Human (interactive)
+
+```bash
+nix develop .#edit
+```
+
 ## Usage
 
 ```bash
-# Enter devShell (includes opencode, jq, git)
-nix develop
-
-# Link config globally
-mkdir -p ~/.config/opencode
-ln -sf "$PWD/opencode.json" ~/.config/opencode/opencode.json
-
-# Reset cache (if needed)
-rm -rf ~/.cache/opencode/node_modules ~/.cache/opencode/bun.lock
-
-# Start opencode
+# Example: run opencode with the repo config
+nix develop .#edit
 opencode
 
-# Authenticate (stop Codex CLI on port 1455 first)
-pkill -f codex || true
+# Example: authenticate (requires network and user interaction)
 opencode auth login
-# Select: OpenAI → ChatGPT Plus/Pro (Codex Subscription)
 
-# Test
-opencode run "hello" --model=openai/gpt-5.1-codex-low
+# Example: smoke
+opencode --version
 ```
 
 ## Files
