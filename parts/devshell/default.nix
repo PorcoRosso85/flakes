@@ -57,13 +57,5 @@
     {
       packages.git-tools = gitTools;
       packages.editor-tools = editorTools;
-
-      devShells.default = pkgs.mkShell {
-        packages = [ gitTools ];
-      };
-
-      devShells.edit = pkgs.mkShell {
-        packages = [ editorTools ];
-      };
     };
 }
