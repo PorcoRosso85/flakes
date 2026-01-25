@@ -59,6 +59,72 @@
             touch "$out"
           '';
 
+      checks.policy-docs-entrypoints =
+        pkgs.runCommand "policy-docs-entrypoints"
+          {
+            nativeBuildInputs = [
+              pkgs.coreutils
+              pkgs.gnugrep
+              pkgs.ripgrep
+            ];
+          }
+          ''
+            set -euo pipefail
+
+            readme="${src}/README.md"
+            if [[ ! -f "$readme" ]]; then
+              echo "README.md not found" >&2
+              exit 1
+            fi
+
+            # Only validate the '## Entrypoints' section to avoid false positives.
+            start="$(${pkgs.ripgrep}/bin/rg -n "^## Entrypoints$" "$readme" | ${pkgs.coreutils}/bin/cut -d: -f1 || true)"
+            if [[ -z "$start" ]]; then
+              echo "README.md must contain a '## Entrypoints' section" >&2
+              exit 1
+            fi
+
+            # Extract until next '## ' header.
+            end="$(${pkgs.ripgrep}/bin/rg -n "^## " "$readme" | ${pkgs.coreutils}/bin/cut -d: -f1 | ${pkgs.gnugrep}/bin/awk -v s="$start" '$1>s {print $1; exit}' || true)"
+            if [[ -n "$end" ]]; then
+              sed_range="$start,$((end-1))p"
+            else
+              sed_range="$start,99999p"
+            fi
+
+            section="$TMPDIR/entrypoints"
+            ${pkgs.coreutils}/bin/sed -n "$sed_range" "$readme" > "$section"
+
+            allowed="$TMPDIR/allowed"
+            ${pkgs.coreutils}/bin/cat >"$allowed" <<'EOF'
+            nix flake check
+            nix run .#test-integration
+            nix run .#test-e2e
+            nix develop .#edit
+            EOF
+
+            # Fail if we see forbidden entrypoints.
+            forbidden="$(${pkgs.ripgrep}/bin/rg -n "\bnix\s+(develop\s+-c|shell\s+-c)\b" "$section" || true)"
+            if [[ -n "$forbidden" ]]; then
+              echo "Entrypoints section must not recommend wrapper invocations:" >&2
+              echo "$forbidden" >&2
+              exit 1
+            fi
+
+            # If section mentions nix commands, require them to be allowlisted.
+            cmds="$(${pkgs.ripgrep}/bin/rg -o "nix (flake check|run \S+|develop \S+)" "$section" | ${pkgs.coreutils}/bin/sort -u || true)"
+            if [[ -n "$cmds" ]]; then
+              bad="$(${pkgs.coreutils}/bin/printf '%s\n' "$cmds" | ${pkgs.gnugrep}/bin/grep -vFx -f "$allowed" || true)"
+              if [[ -n "$bad" ]]; then
+                echo "Entrypoints section contains non-allowlisted nix commands:" >&2
+                echo "$bad" >&2
+                exit 1
+              fi
+            fi
+
+            touch "$out"
+          '';
+
       checks.no-legacy-cue-artifacts =
         pkgs.runCommand "no-legacy-cue-artifacts"
           {
