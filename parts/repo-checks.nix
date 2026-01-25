@@ -93,5 +93,28 @@
 
             touch "$out"
           '';
+
+      checks.outputs-allowlist =
+        pkgs.runCommand "outputs-allowlist"
+          {
+            nativeBuildInputs = [ pkgs.coreutils ];
+          }
+          ''
+            set -euo pipefail
+
+            # apps allowlist
+            allowed_apps="$(${pkgs.coreutils}/bin/printf '%s\n' test-integration test-e2e | ${pkgs.coreutils}/bin/sort)"
+            actual_apps="$(${pkgs.coreutils}/bin/printf '%s\n' ${builtins.concatStringsSep " " (builtins.attrNames config.apps)} | ${pkgs.coreutils}/bin/sort)"
+            if [[ "$actual_apps" != "$allowed_apps" ]]; then
+              echo "apps output contract failed" >&2
+              echo "allowed:" >&2
+              echo "$allowed_apps" >&2
+              echo "actual:" >&2
+              echo "$actual_apps" >&2
+              exit 1
+            fi
+
+            touch "$out"
+          '';
     };
 }
