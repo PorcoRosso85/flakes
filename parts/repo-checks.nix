@@ -106,7 +106,7 @@
             EOF
 
             # Fail if we see forbidden entrypoints.
-            forbidden="$(${pkgs.ripgrep}/bin/rg -n "\bnix\s+(develop\s+-c|shell\s+-c)\b" "$section" || true)"
+            forbidden="$(${pkgs.ripgrep}/bin/rg -n "\bnix\s+(develop|shell)\b.*\s+-c\b" "$section" || true)"
             if [[ -n "$forbidden" ]]; then
               echo "Entrypoints section must not recommend wrapper invocations:" >&2
               echo "$forbidden" >&2
@@ -162,8 +162,8 @@
             touch "$out"
           '';
 
-      checks.policy-no-wrapper-in-apps =
-        pkgs.runCommand "policy-no-wrapper-in-apps"
+      checks.policy-no-wrapper-in-automation =
+        pkgs.runCommand "policy-no-wrapper-in-automation"
           {
             nativeBuildInputs = [
               pkgs.coreutils
@@ -173,15 +173,18 @@
           ''
             set -euo pipefail
 
-            file="${src}/parts/tests/apps.nix"
-            test -f "$file"
+            pat='\bnix\s+(develop|shell)\b.*\s+-c\b'
 
-            bad="$(${pkgs.ripgrep}/bin/rg -n "\bnix\s+(develop\s+-c|shell\s+-c)\b" "$file" || true)"
-            if [[ -n "$bad" ]]; then
-              echo "apps must not invoke nix wrapper commands" >&2
-              echo "$bad" >&2
-              exit 1
-            fi
+            for dir in "${src}/parts" "${src}/scripts" "${src}/.github"; do
+              if [[ -e "$dir" ]]; then
+                hits="$(${pkgs.ripgrep}/bin/rg -n "$pat" "$dir" || true)"
+                if [[ -n "$hits" ]]; then
+                  echo "automation must not invoke nix wrapper commands" >&2
+                  echo "$hits" >&2
+                  exit 1
+                fi
+              fi
+            done
 
             touch "$out"
           '';
