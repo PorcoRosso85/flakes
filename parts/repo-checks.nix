@@ -5,10 +5,7 @@
     let
       src = ../.;
 
-      allowedDevShells = [
-        "default"
-        "edit"
-      ];
+      allowedDevShells = [ ];
 
       actualDevShells = builtins.attrNames config.devShells;
       extraDevShells = builtins.filter (n: !(builtins.elem n allowedDevShells)) actualDevShells;
