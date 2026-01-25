@@ -28,6 +28,12 @@
         set -euo pipefail
 
         export OPENCODE_CONFIG="${opencodeConfig}"
+
+        # Deterministic defaults; users can override explicitly.
+        : "''${OPENCODE_DISABLE_LSP_DOWNLOAD:=true}"
+        : "''${OPENCODE_DISABLE_AUTOUPDATE:=true}"
+        export OPENCODE_DISABLE_LSP_DOWNLOAD OPENCODE_DISABLE_AUTOUPDATE
+
         exec "${pkgs.opencode}/bin/opencode" "$@"
       '';
 
