@@ -23,6 +23,7 @@
         ./parts/devshell/default.nix
         ./parts/repo-checks.nix
         ./parts/tests/apps.nix
+        ./parts/tests/help-app.nix
 
         ./parts/opencode/checks.nix
 

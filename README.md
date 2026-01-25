@@ -15,15 +15,27 @@ nix run .#test-e2e
 ### Human (interactive)
 
 ```bash
-nix develop .#edit
+# Show quick help
+nix run .#help
+
+# Editor tools (hx, opencode)
+nix shell .#editor-tools
+
+# Git tools
+nix shell .#git-tools
+
+# Editor + language tooling (example: Go)
+nix shell .#editor-tools .#go-tooling
 ```
 
 ## Usage
 
 ```bash
-# Example: run opencode with the repo config
-nix develop .#edit
-opencode
+# Example: show help
+nix run .#help
+
+# Example: run opencode with repo config
+nix shell .#editor-tools -c opencode
 
 # Example: authenticate (requires network and user interaction)
 opencode auth login
@@ -34,8 +46,8 @@ opencode --version
 
 ## Files
 
-- `opencode.json`: Configuration with plugin pinned at `@4.2.0`
-- `flake.nix`: DevShell with opencode, jq, git
+- `opencode.json`: Minimal vanilla config (schema only)
+- `flake.nix`: flake-parts setup (no devShells)
 - `parts/languages/*.nix`: Language tooling parts (v1 contract)
 
 ## DoD

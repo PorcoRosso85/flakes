@@ -99,7 +99,10 @@
             nix flake check
             nix run .#test-integration
             nix run .#test-e2e
-            nix develop .#edit
+            nix run .#help
+            nix shell .#editor-tools
+            nix shell .#git-tools
+            nix shell .#editor-tools .#go-tooling
             EOF
 
             # Fail if we see forbidden entrypoints.
@@ -119,7 +122,7 @@
             fi
 
             # If section mentions nix commands, require them to be allowlisted.
-            cmds="$(${pkgs.ripgrep}/bin/rg -o "nix (flake check|run \S+|develop \S+)" "$section" | ${pkgs.coreutils}/bin/sort -u || true)"
+            cmds="$(${pkgs.ripgrep}/bin/rg -o "nix (flake check|run \S+|shell \S+|develop \S+)" "$section" | ${pkgs.coreutils}/bin/sort -u || true)"
             if [[ -n "$cmds" ]]; then
               bad="$(${pkgs.coreutils}/bin/printf '%s\n' "$cmds" | ${pkgs.gnugrep}/bin/grep -vFx -f "$allowed" || true)"
               if [[ -n "$bad" ]]; then
@@ -178,7 +181,7 @@
           ''
             set -euo pipefail
 
-            pat='\bnix\s+(develop|shell)\b.*\s+-c\b'
+            pat='\bnix\s+develop\b.*\s+-c\b'
 
             for dir in "${src}/parts" "${src}/scripts" "${src}/.github"; do
               if [[ -e "$dir" ]]; then
@@ -203,7 +206,7 @@
             set -euo pipefail
 
             # apps allowlist
-            allowed_apps="$(${pkgs.coreutils}/bin/printf '%s\n' test-integration test-e2e | ${pkgs.coreutils}/bin/sort)"
+            allowed_apps="$(${pkgs.coreutils}/bin/printf '%s\n' help test-integration test-e2e | ${pkgs.coreutils}/bin/sort)"
             actual_apps="$(${pkgs.coreutils}/bin/printf '%s\n' ${builtins.concatStringsSep " " (builtins.attrNames config.apps)} | ${pkgs.coreutils}/bin/sort)"
             if [[ "$actual_apps" != "$allowed_apps" ]]; then
               echo "apps output contract failed" >&2
