@@ -113,6 +113,14 @@
               exit 1
             fi
 
+            # Entrypoint names must be hyphenated (flake apps are flat names).
+            dot_names="$(${pkgs.ripgrep}/bin/rg -n "\.\#test\.(integration|e2e)\b" "$section" || true)"
+            if [[ -n "$dot_names" ]]; then
+              echo "Entrypoints section must use '#test-integration' / '#test-e2e' (not dot notation):" >&2
+              echo "$dot_names" >&2
+              exit 1
+            fi
+
             # If section mentions nix commands, require them to be allowlisted.
             cmds="$(${pkgs.ripgrep}/bin/rg -o "nix (flake check|run \S+|develop \S+)" "$section" | ${pkgs.coreutils}/bin/sort -u || true)"
             if [[ -n "$cmds" ]]; then
