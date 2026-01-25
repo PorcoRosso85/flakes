@@ -162,6 +162,30 @@
             touch "$out"
           '';
 
+      checks.policy-no-wrapper-in-apps =
+        pkgs.runCommand "policy-no-wrapper-in-apps"
+          {
+            nativeBuildInputs = [
+              pkgs.coreutils
+              pkgs.ripgrep
+            ];
+          }
+          ''
+            set -euo pipefail
+
+            file="${src}/parts/tests/apps.nix"
+            test -f "$file"
+
+            bad="$(${pkgs.ripgrep}/bin/rg -n "\bnix\s+(develop\s+-c|shell\s+-c)\b" "$file" || true)"
+            if [[ -n "$bad" ]]; then
+              echo "apps must not invoke nix wrapper commands" >&2
+              echo "$bad" >&2
+              exit 1
+            fi
+
+            touch "$out"
+          '';
+
       checks.outputs-allowlist =
         pkgs.runCommand "outputs-allowlist"
           {
