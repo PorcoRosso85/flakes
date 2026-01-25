@@ -64,7 +64,9 @@
           {
             nativeBuildInputs = [
               pkgs.coreutils
+              pkgs.gawk
               pkgs.gnugrep
+              pkgs.gnused
               pkgs.ripgrep
             ];
           }
@@ -85,7 +87,7 @@
             fi
 
             # Extract until next '## ' header.
-            end="$(${pkgs.ripgrep}/bin/rg -n "^## " "$readme" | ${pkgs.coreutils}/bin/cut -d: -f1 | ${pkgs.gnugrep}/bin/awk -v s="$start" '$1>s {print $1; exit}' || true)"
+            end="$(${pkgs.ripgrep}/bin/rg -n "^## " "$readme" | ${pkgs.coreutils}/bin/cut -d: -f1 | ${pkgs.gawk}/bin/awk -v s="$start" '$1>s {print $1; exit}' || true)"
             if [[ -n "$end" ]]; then
               sed_range="$start,$((end-1))p"
             else
@@ -93,7 +95,7 @@
             fi
 
             section="$TMPDIR/entrypoints"
-            ${pkgs.coreutils}/bin/sed -n "$sed_range" "$readme" > "$section"
+            ${pkgs.gnused}/bin/sed -n "$sed_range" "$readme" > "$section"
 
             allowed="$TMPDIR/allowed"
             ${pkgs.coreutils}/bin/cat >"$allowed" <<'EOF'
