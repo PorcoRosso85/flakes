@@ -37,12 +37,29 @@
         exec "${pkgs.opencode}/bin/opencode" "$@"
       '';
 
+      lazygitConfig = ../tests/lazygit-config.yml;
+
+      lazygit = pkgs.writeShellScriptBin "lazygit" ''
+        set -euo pipefail
+
+        # If the user explicitly provides config flags, don't override them.
+        for arg in "$@"; do
+          case "$arg" in
+            -ucf|--use-config-file|-ucd|--use-config-dir)
+              exec "${pkgs.lazygit}/bin/lazygit" "$@"
+              ;;
+          esac
+        done
+
+        exec "${pkgs.lazygit}/bin/lazygit" -ucf "${lazygitConfig}" "$@"
+      '';
+
       gitTools = pkgs.symlinkJoin {
         name = "git-tools";
         paths = [
           pkgs.git
           pkgs.gh
-          pkgs.lazygit
+          lazygit
           pkgs.delta
         ];
       };
