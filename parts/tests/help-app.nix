@@ -19,8 +19,11 @@
             # Editor
             nix shell .#editor-tools
 
-            # Git tools
+            # Git tools (lazygit + delta)
             nix shell .#git-tools
+
+            # Lazygit with side-by-side delta pager (uses repo-provided config)
+            nix shell .#git-tools -c lazygit -ucd "$PWD/parts/tests" -p "$PWD"
 
             # Editor + language tooling (example: Go)
             nix shell .#editor-tools .#go-tooling

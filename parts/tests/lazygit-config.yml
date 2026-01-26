@@ -1,0 +1,4 @@
+git:
+  paging:
+    # Use delta as a pager for diffs.
+    pager: "delta --paging=never --side-by-side"

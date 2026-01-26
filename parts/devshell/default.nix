@@ -43,6 +43,7 @@
           pkgs.git
           pkgs.gh
           pkgs.lazygit
+          pkgs.delta
         ];
       };
 
