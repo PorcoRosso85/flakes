@@ -37,7 +37,8 @@
         exec "${pkgs.opencode}/bin/opencode" "$@"
       '';
 
-      lazygitConfig = ../tests/lazygit-config.yml;
+      # Avoid lazygit trying to migrate a store config file.
+      # We pass the pager directly via environment variables.
 
       lazygit = pkgs.writeShellScriptBin "lazygit" ''
         set -euo pipefail
@@ -51,7 +52,9 @@
           esac
         done
 
-        exec "${pkgs.lazygit}/bin/lazygit" -ucf "${lazygitConfig}" "$@"
+        export DELTA_FEATURES=+side-by-side
+        export GIT_PAGER="${pkgs.delta}/bin/delta --paging=never"
+        exec "${pkgs.lazygit}/bin/lazygit" "$@"
       '';
 
       gitTools = pkgs.symlinkJoin {
