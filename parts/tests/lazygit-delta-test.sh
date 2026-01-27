@@ -41,11 +41,10 @@ git commit -qm init
 
 echo b >>a.txt
 
-# 4) Verify git diff is routed through delta side-by-side.
-# We can't reliably parse TUI output, but we can assert that delta is invoked
-# and emits the side-by-side separator character.
+# 4) Verify delta side-by-side output exists.
 out="$TMPDIR/diff.out"
-GIT_PAGER="${DELTA_BIN:-delta} --paging=never --side-by-side" git --no-pager diff >"$out"
+
+git diff | "${DELTA_BIN:-delta}" --paging=never --side-by-side >"$out"
 rg -q "│" "$out"
 
 # 5) Run lazygit under a pseudo-tty, then exit quickly.
