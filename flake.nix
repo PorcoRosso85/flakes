@@ -24,6 +24,7 @@
         ./parts/repo-checks.nix
         ./parts/tests/apps.nix
         ./parts/tests/help-app.nix
+        ./parts/tests/lazygit-delta-test.nix
 
         ./parts/opencode/checks.nix
 

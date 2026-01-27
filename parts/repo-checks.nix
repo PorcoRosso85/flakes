@@ -206,7 +206,7 @@
             set -euo pipefail
 
             # apps allowlist
-            allowed_apps="$(${pkgs.coreutils}/bin/printf '%s\n' help test-integration test-e2e | ${pkgs.coreutils}/bin/sort)"
+            allowed_apps="$(${pkgs.coreutils}/bin/printf '%s\n' help test-integration test-e2e test-lazygit-delta | ${pkgs.coreutils}/bin/sort)"
             actual_apps="$(${pkgs.coreutils}/bin/printf '%s\n' ${builtins.concatStringsSep " " (builtins.attrNames config.apps)} | ${pkgs.coreutils}/bin/sort)"
             if [[ "$actual_apps" != "$allowed_apps" ]]; then
               echo "apps output contract failed" >&2
